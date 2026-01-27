@@ -1,35 +1,52 @@
-import {useState} from 'react';
-import type {CarouselOptions} from "./types";
-import {mod} from "./utils";
-import "./styles.css"
+import { useMemo, useState } from "react";
+import type { CarouselOptions } from "./types";
+import { mod } from "./utils";
+import { useElementSize } from "./useElementSize";
+import "./styles.css";
 
 type Props = {
     images: string[];
     options?: CarouselOptions;
 };
 
-export function ImageCarousel({images, options}: Props) {
-    const fix = options?.fit ?? "contain";
-    const n = images.length;
+export function ImageCarousel({ images, options }: Props) {
+    const fit = options?.fit ?? "contain";
+    const transitionMs = options?.transitionMs ?? 300;
 
+    const n = images.length;
     const [index, setIndex] = useState(0);
+
+    const { setEl, width: vpWidth } = useElementSize<HTMLDivElement>();
 
     const prev = () => setIndex((i) => mod(i - 1, n));
     const next = () => setIndex((i) => mod(i + 1, n));
 
-    if (images.length === 0) {
-        return <div className="carousel-viewport"/>;
-    }
+    const trackX = useMemo(() => -index * vpWidth, [index, vpWidth]);
+
+    if (n === 0) return <div className="carousel-viewport" />;
 
     return (
-        <div className="carousel-viewport">
-            <img
-                className="carousel-img"
-                src={images[index]}
-                alt=""
-                draggable={false}
-                style={{objectFit: fix}}
-            />
+        <div ref={setEl} className="carousel-viewport">
+            <div
+                className="carousel-track"
+                style={{
+                    transform: `translate3d(${trackX}px, 0, 0)`,
+                    transition: `transform ${transitionMs}ms ease`,
+                }}
+            >
+                {images.map((src, i) => (
+                    <div key={`${src}-${i}`} className="carousel-slide">
+                        <img
+                            className="carousel-img"
+                            src={src}
+                            alt=""
+                            draggable={false}
+                            style={{ objectFit: fit }}
+                        />
+                    </div>
+                ))}
+            </div>
+
             <button className="carousel-btn left" onClick={prev} aria-label="prev">
                 ◀
             </button>
