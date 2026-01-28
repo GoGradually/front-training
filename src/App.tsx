@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import { ImageCarousel } from "./carousel/ImageCarousel";
+import VideoPlayer from "./VideoPlayer/VideoPlayer";
+import React from "react";
 
 export default function App() {
-    const images = [
-        "./images/carousel/1.jpeg",
-        "./images/carousel/2.jpeg",
-        "./images/carousel/3.jpeg",
-        "./images/carousel/4.jpeg",
-        "./images/carousel/5.jpeg",
-    ];
-
-    return <ImageCarousel images={images} options={{fit: "contain"}}/>
+    return (
+        <div>
+            <h1>React Video Player</h1>
+            <VideoPlayer src="/videos/1.mp4"/>
+        </div>
+    )
 }
