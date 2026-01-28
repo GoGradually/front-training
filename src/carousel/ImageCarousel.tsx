@@ -4,6 +4,7 @@ import { mod } from "./utils";
 import { useElementSize } from "./useElementSize";
 import "./styles.css";
 import {useAutoplay} from "./useAutoplay";
+import {usePointerSwipe} from "./usePointerSwipe";
 
 type Props = {
     images: string[];
@@ -21,12 +22,21 @@ export function ImageCarousel({ images, options }: Props) {
 
     const { setEl, width: vpWidth } = useElementSize<HTMLDivElement>();
 
-    const go = useCallback((nextIndex: number) => {
-        setIndex(()=> mod(nextIndex, n));
-    }, [n]);
+    if (n === 0) return <div className="carousel-viewport" />;
 
     const prev = () => go(index - 1);
     const next = () => go(index + 1);
+
+    const { bind, isDragging, dragX } = usePointerSwipe({
+        vpWidth,
+        onSwipeLeft: next,
+        onSwipeRight: prev,
+        onDragStateChange: (dragging) => setPaused(dragging),
+    })
+
+    const go = useCallback((nextIndex: number) => {
+        setIndex(()=> mod(nextIndex, n));
+    }, [n]);
 
     useAutoplay({
         enabled: n > 0 && !paused,
@@ -36,20 +46,22 @@ export function ImageCarousel({ images, options }: Props) {
 
     const trackX = useMemo(() => -index * vpWidth, [index, vpWidth]);
 
-    if (n === 0) return <div className="carousel-viewport" />;
+
 
     return (
         <div
             ref={setEl}
             className="carousel-viewport"
             onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
+            onMouseLeave={() => !isDragging && setPaused(false)}
         >
             <div
                 className="carousel-track"
+                {...bind}
                 style={{
                     transform: `translate3d(${trackX}px, 0, 0)`,
-                    transition: `transform ${transitionMs}ms ease`,
+                    transition: isDragging ? "none" : `transform ${transitionMs}ms ease`,
+                    cursor: isDragging ? "grabbing" : "grab",
                 }}
             >
                 {images.map((src, i) => (
