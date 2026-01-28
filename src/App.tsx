@@ -7,7 +7,7 @@ export default function App() {
     return (
         <div>
             <h1>React Video Player</h1>
-            <VideoPlayer src="/videos/1.mp4"/>
+            <VideoPlayer src="/videos/4.mp4"/>
         </div>
     )
 }
